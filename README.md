@@ -36,3 +36,5 @@ library(patchwork)
 The rendered key for the code in this repository is [here](https://github.com/zeldaareif/week-05_spring-2026_aquatic-inverts/blob/main/code/week-05_in-class-KEY.pdf).
 
 The rendered document from class is [here](https://github.com/zeldaareif/week-05_spring-2026_aquatic-inverts/blob/main/code/in-class-template.pdf).
+
+The rendered individual assignment is [here](https://github.com/zeldaareif/week-05_spring-2026_aquatic-inverts/blob/main/code/ZeldaReif_IndividualAssignment5.pdf).
