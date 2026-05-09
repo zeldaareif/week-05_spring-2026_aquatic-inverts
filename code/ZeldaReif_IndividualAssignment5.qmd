@@ -1,0 +1,176 @@
+---
+title: "Individual Assignment 5"
+author: "Zelda Reif"
+date: "2026-05-10"
+format: pdf
+---
+
+# 1. Set Up
+
+## Packages
+
+```{r}
+#| label: packages
+
+# general use
+library(tidyverse)
+library(here)
+library(janitor)
+library(snakecase)
+
+# wrap axis labels
+library(scales)
+
+# reading .xlsx files 
+library(readxl)
+
+# visualize missing data
+library(naniar)
+
+# arrange plots
+library(patchwork)
+```
+
+## Data
+
+```{r}
+#| label: data
+
+# taxonomic info
+taxon_list <- read_csv(here("data","taxon_list.csv"))
+
+# aquatic invertebrates
+aq_ins <- read_xlsx(
+  here("data", "Aquatic Sampling Data-2026-03-10.xlsx"),
+  sheet = "Aquatic Insects"
+)
+
+# site info
+sites <- read_xlsx(
+   here("data", "Aquatic Sampling Data-2026-03-10.xlsx"),
+   sheet = "sites"
+)
+
+# water quality
+water_quality <- read_xlsx(
+  here("data", "Aquatic Sampling Data-2026-03-10.xlsx"),
+  sheet = "Water Quality",
+  na = c("", "n/a", "N/A", "over", "173+")
+)
+```
+
+# 2. Cleaning
+
+## `sites` object
+
+Goal: create a new object from `sites` thst only includes NCOS sites
+
+
+```{r}
+#| label: ncos-sites
+
+# creating new object
+ncos_sites <- sites |>
+  # filtering to only include ncos quarterly sampling sites
+  filter(sector == "NCOS" & sampling_frequency == "Quarterly")
+```
+
+## clean `taxon_list`
+
+Goal: convert character strongs in existing `taxon_list` data frame into snakecase
+
+```{r}
+#| label: cleaing-taxon
+
+taxon_list_clean <- taxon_list |> 
+  # convert taxon names to snakecase
+  mutate(verbatim_name = to_any_case(verbatim_name, 
+                                     case = "snake"))
+```
+
+## clean `water_quality`
+
+Goal: create a data frame with mean pH, mean DO (mg/L) and mean salinity (ppt) for each data and site
+
+- create a new object from water_quality
+- clean column names use janitor
+- only include surveys from quarterly ncos sites
+- create a new column called date_site to join with later - - data frames
+- group bt data_site
+- calc median pH, salinity and dissolved oxygen
+- ungroup
+- filter out outliers
+
+```{r}
+#| label: cleaning-water-quality
+
+water_quality_clean <- water_quality |> 
+  clean_names() |> 
+  semi_join(ncos_sites, by = "site") |> 
+  unite("date_site", date, site, remove = TRUE) |> 
+  group_by(date, site) |> 
+  summarize(med_ph = median(p_h, na.rm = TRUE),
+             med_sal = median(salinity_ppt, na.rm = TRUE),
+             med_do = median(dissolved_oxygen_mg_l, na.rm = TRUE) |> 
+  ungroup() |> 
+  filter(date_site != "2022-08-12_NVBR")
+
+```
+
+
+## clean `aq_ins`
+
+Goal: create long format data frame in which each row contains the counted individuals in each taxon during each survey. The data frame should include taxonomic information foe each organism and the water quality info for each survey.
+
+- create new object
+- clean column names
+- filter to only include a quarterly NCOS sites
+- slect columns
+- filter to only include "filtered beaker" smaple
+- convert data frame to long format
+- group by site, date and taxon
+- calculate avg. abundance per liter (sum counts divided by 7.5 liter)
+- create new column called date_site to join with water
+- quality
+- join data frame
+- join with taxon list
+
+```{r}
+#| label: cleaning-aq-ins
+
+aq_ins_clean <- aq_ins |> 
+  clean_names() |> 
+  semi_join(ncos_sites, by = "site") |> 
+  rename(date = date_on_vial) |> 
+  select(date, sample_type, site,
+         ostracod,
+         copepod,
+         hemiptera_corixidae_boatman,
+         nematode,
+         diptera_ceratopogonidae,
+         annelida_oligochaete,
+         diptera_chironomid,
+         annelida_polychaete) |> 
+  filter(sample_type %in% c("FB250", "FB 250")) |> 
+  pivot_longer(
+    # columns to make longer
+    cols = ostracod:annelida_polychaete,
+    # new column for the old column names
+    names_to = "taxon",
+    # new column for the values in each of the old columns
+    values_to = "abundance"
+  ) |> 
+  group_by(date, site, taxon) |> 
+  summarize(ave_lit = sumabundance, na.rm = TRUE/7.5) |>
+  ungroup() |> 
+  unite("date_site", date, site, remove = TRUE) |> 
+  left_join(water_quality_clean, by = "date_site") |> 
+  left_join(taxon_list_clean, by = c("taxon" = "verbatim_name")) |> 
+  mutate(site_full = case_when)
+
+
+```
+
+# Problems
+
+## 1. 
