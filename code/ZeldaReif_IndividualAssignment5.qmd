@@ -3,6 +3,8 @@ title: "Individual Assignment 5"
 author: "Zelda Reif"
 date: "2026-05-10"
 format: pdf
+error: FALSE
+message: FALSE
 ---
 
 # 1. Set Up
@@ -107,11 +109,11 @@ Goal: create a data frame with mean pH, mean DO (mg/L) and mean salinity (ppt) f
 water_quality_clean <- water_quality |> 
   clean_names() |> 
   semi_join(ncos_sites, by = "site") |> 
-  unite("date_site", date, site, remove = TRUE) |> 
-  group_by(date, site) |> 
+  unite("date_site", date, site, remove = FALSE) |> 
+  group_by(date, site, date_site) |>
   summarize(med_ph = median(p_h, na.rm = TRUE),
              med_sal = median(salinity_ppt, na.rm = TRUE),
-             med_do = median(dissolved_oxygen_mg_l, na.rm = TRUE) |> 
+             med_do = median(dissolved_oxygen_mg_l, na.rm = TRUE)) |> 
   ungroup() |> 
   filter(date_site != "2022-08-12_NVBR")
 
@@ -138,39 +140,71 @@ Goal: create long format data frame in which each row contains the counted indiv
 ```{r}
 #| label: cleaning-aq-ins
 
+# creating new clean object from aquatic inverts
 aq_ins_clean <- aq_ins |> 
+  # clean column names
   clean_names() |> 
-  semi_join(ncos_sites, by = "site") |> 
+  # filtering join: only include sites occurring in ncos_sites
+  semi_join(ncos_sites, by = c("site")) |> 
+  # renaming columns
   rename(date = date_on_vial) |> 
+  # select columns of interest
   select(date, sample_type, site,
          ostracod,
          copepod,
          hemiptera_corixidae_boatman,
+         cladocera,
          nematode,
-         diptera_ceratopogonidae,
+         diptera_ceratopogonidae, 
          annelida_oligochaete,
          diptera_chironomid,
          annelida_polychaete) |> 
-  filter(sample_type %in% c("FB250", "FB 250")) |> 
-  pivot_longer(
-    # columns to make longer
-    cols = ostracod:annelida_polychaete,
-    # new column for the old column names
-    names_to = "taxon",
-    # new column for the values in each of the old columns
-    values_to = "abundance"
-  ) |> 
+  # filter to only include "filtered beaker" samples
+  filter(sample_type %in% c("FB 250", "FB250")) |> 
+  # convert the data frame to long format
+  pivot_longer(cols = ostracod:annelida_polychaete,
+               names_to = "taxon",
+               values_to = "abundance") |> 
+  # group by date, site, taxon
   group_by(date, site, taxon) |> 
-  summarize(ave_lit = sumabundance, na.rm = TRUE/7.5) |>
+  # calculate average abundance per liter (sum abundance divided by 7.5 liters)
+  summarize(ave_lit = sum(abundance, na.rm = TRUE)/7.5) |> 
+  # ungroup data frame
   ungroup() |> 
-  unite("date_site", date, site, remove = TRUE) |> 
-  left_join(water_quality_clean, by = "date_site") |> 
+  # create a new column called `date_site` to join with water quality
+  unite("date_site", date, site, remove = FALSE) |> 
+  # join with water quality
+  left_join(
+  select(water_quality_clean,
+         date_site,
+         med_ph,
+         med_sal,
+         med_do),
+  by = "date_site"
+) |> 
+  # join with taxon list
   left_join(taxon_list_clean, by = c("taxon" = "verbatim_name")) |> 
-  mutate(site_full = case_when)
-
-
+  # add full names of sites
+  mutate(site_full = case_when(
+    site == "NVBR" ~ "North of Venoco Bridge",
+    site == "NEC" ~ "South of Venoco Bridge",
+    site == "NMC" ~ "Main Channel",
+    site == "NPB" ~ "South of Phelps Bridge",
+    site == "NPB1" ~ "North of Phelps Bridge",
+    site == "NPB2" ~ "Phelps Road",
+    site == "NWP" ~  "West Pond",
+    site == "NDC" ~ "Devereux Creek"
+  )) |> 
+  # setting factor levels for site
+  mutate(site_full = fct_reorder(site_full, med_sal, .fun = "median", .na_rm = TRUE),
+         site_full = fct_rev(site_full))
 ```
 
 # Problems
 
 ## 1. 
+
+```{r}
+
+```
+
