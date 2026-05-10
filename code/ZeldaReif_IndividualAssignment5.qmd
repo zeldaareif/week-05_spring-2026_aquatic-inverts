@@ -2,8 +2,15 @@
 title: "Individual Assignment 5"
 author: "Zelda Reif"
 date: "2026-05-10"
-format: pdf
+format: 
+  pdf:
+    include-in-header: 
+       text: |
+         \usepackage{fvextra}
+         \DefineVerbatimEnvironment{Highlighting}{Verbatim}{breaklines,commandchars=\\\{\}}
+         \DefineVerbatimEnvironment{OutputCode}{Verbatim}{breaklines,commandchars=\\\{\}}
 error: FALSE
+warning: FALSE
 message: FALSE
 ---
 
@@ -65,9 +72,6 @@ water_quality <- read_xlsx(
 
 ## `sites` object
 
-Goal: create a new object from `sites` thst only includes NCOS sites
-
-
 ```{r}
 #| label: ncos-sites
 
@@ -79,8 +83,6 @@ ncos_sites <- sites |>
 
 ## clean `taxon_list`
 
-Goal: convert character strongs in existing `taxon_list` data frame into snakecase
-
 ```{r}
 #| label: cleaing-taxon
 
@@ -91,17 +93,6 @@ taxon_list_clean <- taxon_list |>
 ```
 
 ## clean `water_quality`
-
-Goal: create a data frame with mean pH, mean DO (mg/L) and mean salinity (ppt) for each data and site
-
-- create a new object from water_quality
-- clean column names use janitor
-- only include surveys from quarterly ncos sites
-- create a new column called date_site to join with later - - data frames
-- group bt data_site
-- calc median pH, salinity and dissolved oxygen
-- ungroup
-- filter out outliers
 
 ```{r}
 #| label: cleaning-water-quality
@@ -119,23 +110,7 @@ water_quality_clean <- water_quality |>
 
 ```
 
-
 ## clean `aq_ins`
-
-Goal: create long format data frame in which each row contains the counted individuals in each taxon during each survey. The data frame should include taxonomic information foe each organism and the water quality info for each survey.
-
-- create new object
-- clean column names
-- filter to only include a quarterly NCOS sites
-- slect columns
-- filter to only include "filtered beaker" smaple
-- convert data frame to long format
-- group by site, date and taxon
-- calculate avg. abundance per liter (sum counts divided by 7.5 liter)
-- create new column called date_site to join with water
-- quality
-- join data frame
-- join with taxon list
 
 ```{r}
 #| label: cleaning-aq-ins
@@ -202,9 +177,60 @@ aq_ins_clean <- aq_ins |>
 
 # Problems
 
-## 1. 
+## 1. Visualizing differences across sites in major taxon abundance
+
+### a. Plan your figure
+
+x-axis: site
+y-axis: ostracod abundance
+geometry to represent average abundance/L: `geom_jitter`
+geometry to represent medians: `stat_summary()`
+
+### b. Wrangle your data
 
 ```{r}
 
 ```
 
+### c. Code your figure
+
+```{r}
+
+```
+
+### d. Create a multipanel figure
+
+```{r}
+
+```
+
+### e. Interpret your figure
+
+differences between sites in copepod and ostracod abundance
+how ostracod abundance may relate (or not) to site-level differences in salinity
+
+## 2. Visualizing total abundance as a function of salinity
+
+### a. Plan your figure
+
+x-axis:
+y-axis:
+color:
+geometry:
+facets:
+
+### b. Wrangle your data
+
+```{r}
+
+```
+
+### c. Code your figure
+
+```{r}
+
+```
+
+### d. Interpret your figure
+
+In 3-5 sentences, describe differences or similarities between taxa in relationships between abundance and salinity. Be specific using the visual components of the plot.
