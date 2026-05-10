@@ -181,15 +181,31 @@ aq_ins_clean <- aq_ins |>
 
 ### a. Plan your figure
 
-x-axis: site
-y-axis: ostracod abundance
-geometry to represent average abundance/L: `geom_jitter`
-geometry to represent medians: `stat_summary()`
+- x-axis: site
+- y-axis: ostracod abundance
+- geometry to represent average abundance/L: `geom_jitter`
+- geometry to represent medians: `stat_summary()`
 
 ### b. Wrangle your data
 
 ```{r}
+#| label: wrangling-aq-ins-clean
 
+# create new object from aq_ins_clean
+ost_cod_abundance <- aq_ins_clean |> 
+  # filter to only ostracods
+  filter(taxon == "ostracod") |> 
+  # remove missing abundance/L values
+  filter(!is.na(ave_lit)) |> 
+  # group by site
+  group_by(site_full) |> 
+  # combines all abundance values for each site
+  summarize(
+    ave_lit = sum(ave_lit, na.rm = TRUE)) |> 
+  # ungroup dataframe
+  ungroup()
+
+slice_sample(ost_cod_abundance, n = 10)
 ```
 
 ### c. Code your figure
