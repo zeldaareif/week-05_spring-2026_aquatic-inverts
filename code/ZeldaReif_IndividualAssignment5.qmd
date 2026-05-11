@@ -84,7 +84,7 @@ ncos_sites <- sites |>
 ## clean `taxon_list`
 
 ```{r}
-#| label: cleaing-taxon
+#| label: cleaning-taxon
 
 taxon_list_clean <- taxon_list |> 
   # convert taxon names to snakecase
@@ -214,7 +214,7 @@ ost_abundance <- aq_ins_clean |>
   group_by(site_full) |> 
   # log + 1 transform mean abundance per liter
   mutate(log_ave_lit = log(ave_lit + 1)) |> 
-  # ungroup dataframe
+  # ungroup data frame
   ungroup()
 
 slice_sample(ost_abundance, n = 10)
@@ -226,7 +226,6 @@ slice_sample(ost_abundance, n = 10)
 #| label: plotting-ostracods
 #| fig-height: 8
 #| fig-width: 8
-
 
 # base layer
 ostracods_plot <- ggplot(data = ost_abundance,
@@ -357,7 +356,32 @@ facets: facet_wrap(~ taxon, scales = "free")
 ### b. Wrangle your data
 
 ```{r}
+#| label: cleaning-abu_sal
 
+# create new object from aq_ins_clean
+abundance_salinity <- aq_ins_clean |> 
+  # create log-transformed abundance column
+  mutate(log_ave_lit = log(ave_lit + 1)) |>
+  # make taxon names title case
+  mutate(taxon = str_to_title(taxon)) |>
+  # group by taxon
+  group_by(taxon) |>
+  # calculate max abundance
+  mutate(max_abundance = max(log_ave_lit, na.rm = TRUE)) |>
+  # un group data frame
+  ungroup() |>
+  # reorder taxa by maximum abundance
+  mutate(taxon = fct_reorder(taxon,
+                        max_abundance,
+                        .desc = TRUE)) |>
+  # keep needed columns
+  select(taxon,
+         med_sal,
+         log_ave_lit)
+
+# display 10 random rows
+abundance_salinity |>
+  slice_sample(n = 10)
 ```
 
 ### c. Code your figure
