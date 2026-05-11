@@ -192,26 +192,55 @@ aq_ins_clean <- aq_ins |>
 #| label: wrangling-aq-ins-clean
 
 # create new object from aq_ins_clean
-ost_cod_abundance <- aq_ins_clean |> 
+ost_abundance <- aq_ins_clean |> 
   # filter to only ostracods
   filter(taxon == "ostracod") |> 
   # remove missing abundance/L values
   filter(!is.na(ave_lit)) |> 
   # group by site
   group_by(site_full) |> 
-  # combines all abundance values for each site
-  summarize(
-    ave_lit = sum(ave_lit, na.rm = TRUE)) |> 
+  # log + 1 transform mean abundance per liter
+  mutate(log_ave_lit = log(ave_lit + 1)) |> 
   # ungroup dataframe
   ungroup()
 
-slice_sample(ost_cod_abundance, n = 10)
+slice_sample(ost_abundance, n = 10)
 ```
 
 ### c. Code your figure
 
 ```{r}
+#| label: plotting-ostracods
+#| fig-height: 8
+#| fig-width: 8
 
+
+# base layer
+ost_abundance <- ggplot(data = ost_abundance,
+                   # x-axis: site
+                   # y-axis: mean abundance/L
+                   mapping = aes(x = site_full,
+                                 y = log_ave_lit)) +
+  # first layer: points to represent observations
+  geom_jitter(height = 0,
+              shape = 21,
+              width = 0.1) +
+  # second layer: points to represent medians
+  stat_summary(geom = "point",
+               fun = "median",
+               size = 4,
+               color = "darkgreen") +
+  # wrapping x-axis text
+  scale_x_discrete(labels = label_wrap(15)) +
+  # relabelling x- and y-axis, adding title
+  labs(x = "Site",
+       y = "log + 1 transformed average abundance/L",
+       title = "Ostracod Abundance at NCOS") +
+  # different theme
+  theme_bw()
+
+# displaying object
+ost_abundance
 ```
 
 ### d. Create a multipanel figure
