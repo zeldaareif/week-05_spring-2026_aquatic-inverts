@@ -175,6 +175,19 @@ aq_ins_clean <- aq_ins |>
          site_full = fct_rev(site_full))
 ```
 
+## clean `aq_ins_clean`
+```{r}
+#| label: cleaning-copepods
+
+# creating new object from clean aquatic inverts 
+copepods <- aq_ins_clean |> 
+  # filter to only include copepods
+  filter(taxon == "copepod") |> 
+  # log + 1 transform mean abundance per liter
+  mutate(log_ave_lit = log(ave_lit + 1))
+
+```
+
 # Problems
 
 ## 1. Visualizing differences across sites in major taxon abundance
@@ -216,7 +229,7 @@ slice_sample(ost_abundance, n = 10)
 
 
 # base layer
-ost_abundance <- ggplot(data = ost_abundance,
+ostracods_plot <- ggplot(data = ost_abundance,
                    # x-axis: site
                    # y-axis: mean abundance/L
                    mapping = aes(x = site_full,
@@ -235,7 +248,7 @@ ost_abundance <- ggplot(data = ost_abundance,
   # relabelling x- and y-axis, adding title
   labs(x = "Site",
        y = "log + 1 transformed average abundance/L",
-       title = "Ostracod Abundance at NCOS") +
+       title = "Ostracod Abundance") +
   # different theme
   theme_bw()
 
@@ -246,7 +259,83 @@ ost_abundance
 ### d. Create a multipanel figure
 
 ```{r}
+#| label: combining-plots
+#| fig-height: 14
+#| fig-width: 14
 
+# base layer
+salinity_plot <- ggplot(data = aq_ins_clean,
+       # x-axis: site
+       # y-axis: mean salinity
+       mapping = aes(x = site_full,
+                     y = med_sal)) +
+  # first layer: salinity measurements at each survey
+  geom_jitter(height = 0,
+              width = 0.1,
+              shape = 21) +
+  # wrapping x-axis text
+  scale_x_discrete(labels = label_wrap(width = 15)) +
+  # second layer: points to represent means
+  stat_summary(fun = median,
+               color = "red",
+               size = 1) +
+  # relabelling x- and y-axes
+  labs(x = "Site",
+       y = "Median salinity (ppt)",
+       title = "Site Salinity") +
+  # different theme
+  theme_bw() 
+
+# base layer
+copepods_plot <- ggplot(data = copepods,
+                   # x-axis: site
+                   # y-axis: mean abundance/L
+                   mapping = aes(x = site_full,
+                                 y = log_ave_lit)) +
+  # first layer: points to represent observations
+  geom_jitter(height = 0,
+              shape = 21,
+              width = 0.1) +
+  # second layer: points to represent medians
+  stat_summary(geom = "point",
+               fun = "median",
+               size = 4,
+               color = "blue") +
+  # wrapping x-axis text
+  scale_x_discrete(labels = label_wrap(15)) +
+  # relabelling x- and y-axis, adding title
+  labs(x = "Site",
+       y = "Average abundance/L",
+       title = "Copepod Abundance") +
+  # different theme
+  theme_bw() 
+
+# base layer
+ostracods_plot <- ggplot(data = ost_abundance,
+                   # x-axis: site
+                   # y-axis: mean abundance/L
+                   mapping = aes(x = site_full,
+                                 y = log_ave_lit)) +
+  # first layer: points to represent observations
+  geom_jitter(height = 0,
+              shape = 21,
+              width = 0.1) +
+  # second layer: points to represent medians
+  stat_summary(geom = "point",
+               fun = "median",
+               size = 4,
+               color = "darkgreen") +
+  # wrapping x-axis text
+  scale_x_discrete(labels = label_wrap(15)) +
+  # relabelling x- and y-axis, adding title
+  labs(x = "Site",
+       y = "Average abundance/L",
+       title = "Ostracod Abundance") +
+  # different theme
+  theme_bw()
+
+(salinity_plot) / (copepods_plot + ostracods_plot) +
+  plot_annotation(title = "Comparing Salinity, Copepod Abundance, and Ostracod Abundance across sites at NCOS")
 ```
 
 ### e. Interpret your figure
