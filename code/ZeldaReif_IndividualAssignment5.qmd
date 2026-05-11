@@ -333,6 +333,7 @@ ostracods_plot <- ggplot(data = ost_abundance,
   # different theme
   theme_bw()
 
+# arranging plots
 (salinity_plot) / (copepods_plot + ostracods_plot) +
   plot_annotation(title = "Comparing Salinity, Copepod Abundance, and Ostracod Abundance across sites at NCOS")
 ```
