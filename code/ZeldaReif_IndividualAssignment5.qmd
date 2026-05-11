@@ -342,17 +342,17 @@ ostracods_plot <- ggplot(data = ost_abundance,
 
 South of Phelps Bridge and Devereux Creek had the highest Average abundance/L measurements across sites for Ostracods. The other sites had pretty consistent lower average abundance/L measurements. North of Venoco Bridge and South of Phelps Bridge had the highest Average abundance/L measurements across sites for Copepods. Main Channel and North of Phelps Bridge had the lowest average abundance/L measurements for Copepods. I could determine these comparisons by observing how high up on the y axis data points lie, and compare across sites on the x axis.
 
-There does not appear to be a strong correlation between site salinity and ostracod abundance. The site with the highest average salinity (ppt) measurments, South of Vencoco Bridge, does not have a notably different average abundance/L measurements than the other sites. Similarly, the site with the highest average abundance/L measurements, South of Phelps Bridge, did not have comparibly hhigh of low salinity (ppt) points along the y axis.
+There does not appear to be a strong correlation between site salinity and ostracod abundance. The site with the highest average salinity (ppt) measurements, South of Vencoco Bridge, does not have a notably different average abundance/L measurements than the other sites. Similarly, the site with the highest average abundance/L measurements, South of Phelps Bridge, did not have comparibly high of low salinity (ppt) points along the y axis.
 
 ## 2. Visualizing total abundance as a function of salinity
 
 ### a. Plan your figure
 
-x-axis:
-y-axis:
-color:
-geometry:
-facets:
+x-axis: med_sal
+y-axis: log_ave_lit
+color: taxon
+geometry: geom_point()
+facets: facet_wrap(~ taxon, scales = "free")
 
 ### b. Wrangle your data
 
