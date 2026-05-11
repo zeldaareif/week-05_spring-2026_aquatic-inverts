@@ -36,8 +36,9 @@ library(readxl)
 # visualize missing data
 library(naniar)
 
-# arrange plots
+# making plots
 library(patchwork)
+library(NatParksPalettes)
 ```
 
 ## Data
@@ -356,14 +357,14 @@ facets: facet_wrap(~ taxon, scales = "free")
 ### b. Wrangle your data
 
 ```{r}
-#| label: cleaning-abu_sal
+#| label: cleaning-abu-sal
 
 # create new object from aq_ins_clean
 abundance_salinity <- aq_ins_clean |> 
   # create log-transformed abundance column
   mutate(log_ave_lit = log(ave_lit + 1)) |>
-  # make taxon names title case
-  mutate(taxon = str_to_title(taxon)) |>
+  # remove underscores from taxon names
+  mutate(taxon = str_to_sentence(str_replace_all(taxon, "_", " "))) |>
   # group by taxon
   group_by(taxon) |>
   # calculate max abundance
@@ -387,7 +388,38 @@ abundance_salinity |>
 ### c. Code your figure
 
 ```{r}
+#| label: abu-sal-plot
+#| fig-height: 10
+#| fig-width: 10
 
+# base layer
+abu_sal_plot <- ggplot(data = abundance_salinity,
+                   # x-axis: salinity
+                   # y-axis: mean abundance/L
+                   mapping = aes(x = med_sal,
+                                 y = log_ave_lit,
+                                 color = taxon)) +
+  # first layer: points to represent observations
+  geom_jitter(height = 0,
+              shape = 21,
+              width = 0.1) +
+  # second layer: points to represent medians
+  stat_summary(geom = "point",
+               fun = "median",
+               size = 1) +
+  facet_wrap(~ taxon) + 
+  # re labelling x- and y-axis, adding title
+  labs(x = "Salinity (ppt)",
+       y = "Average abundance/L",
+       color = "Taxon",
+       title = "Salinity vs. Abundance by Taxon at NCOS") +
+  # change color palette, indicate 9 colors for 9 taxon groups
+  scale_color_manual(values = natparks.pals("Everglades", n = 9)) +
+  # different theme
+  theme_bw() 
+
+# display plot
+abu_sal_plot
 ```
 
 ### d. Interpret your figure
