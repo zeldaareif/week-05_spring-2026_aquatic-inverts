@@ -247,13 +247,12 @@ ostracods_plot <- ggplot(data = ost_abundance,
   scale_x_discrete(labels = label_wrap(15)) +
   # relabelling x- and y-axis, adding title
   labs(x = "Site",
-       y = "log + 1 transformed average abundance/L",
+       y = "Average abundance/L",
        title = "Ostracod Abundance") +
   # different theme
   theme_bw()
 
-# displaying object
-ost_abundance
+ostracods_plot
 ```
 
 ### d. Create a multipanel figure
@@ -348,11 +347,11 @@ There does not appear to be a strong correlation between site salinity and ostra
 
 ### a. Plan your figure
 
-x-axis: med_sal
-y-axis: log_ave_lit
-color: taxon
-geometry: geom_point()
-facets: facet_wrap(~ taxon, scales = "free")
+- x-axis: med_sal
+- y-axis: log_ave_lit
+- color: taxon
+- geometry: geom_point()
+- facets: facet_wrap(~ taxon, scales = "free")
 
 ### b. Wrangle your data
 
@@ -412,16 +411,15 @@ abu_sal_plot <- ggplot(data = abundance_salinity,
   labs(x = "Salinity (ppt)",
        y = "Average abundance/L",
        color = "Taxon",
-       title = "Salinity vs. Abundance by Taxon at NCOS") +
+       title = "Salinity vs. Abundance by Aquatic Invertebrate Taxon at NCOS") +
   # change color palette, indicate 9 colors for 9 taxon groups
   scale_color_manual(values = natparks.pals("Everglades", n = 9)) +
   # different theme
   theme_bw() 
 
-# display plot
 abu_sal_plot
 ```
 
 ### d. Interpret your figure
 
-In 3-5 sentences, describe differences or similarities between taxa in relationships between abundance and salinity. Be specific using the visual components of the plot.
+Ostracods and Caldocera exist in the highest average abundance at lower salinities, between 0 and 10 ppt. Annelida polychaete, Annelida oligochaete, Diptera chironomid, Diptera ceratopogonidae and Nematodes all exist in low average abundance, typically less than 1/L, across the entire salinity range, 0-80 ppt. I could determine both of these patterns by observing where the highest concentration of data points lies along both the y and y axes. Copepods and Hemiptera corixidae boatman are a bit more variable; there are data points high and low along both the average abundance and salinity axes.
